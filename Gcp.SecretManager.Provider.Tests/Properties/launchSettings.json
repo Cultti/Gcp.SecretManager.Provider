@@ -1,0 +1,7 @@
+{
+  "profiles": {
+    "Gcp.SecretManager.Provider.Tests": {
+      "commandName": "Project"
+    }
+  }
+}
