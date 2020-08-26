@@ -20,9 +20,10 @@ dotnet add package Gcp.SecretManager.Provider
 2. Configure secret manager as configuration source
 ```
 config.AddGcpSecretManager(options => {
-   options.ProjectName = "ProjectId"; // Required
+   options.ProjectId = "ProjectId"; // Required
    options.CredentialsPath = "/path/to/credentials"; // Optional
 });
 ```
-You can also provide CredentialsPath with GOOGLE_APPLICATION_CREDENTIALS environment variable
+*You can also provide CredentialsPath with GOOGLE_APPLICATION_CREDENTIALS environment variable*
+
 3. Ready to go!
