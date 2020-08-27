@@ -51,6 +51,12 @@ namespace Gcp.SecretManager.Provider.Tests
         }
 
         [Fact]
+        public void Should_ThrowArgumentNullException_When_OptionsIsNull()
+        {
+            Assert.Throws<ArgumentNullException>(() => new SecretManagerConfigurationSource(null, null));
+        }
+
+        [Fact]
         public void Should_ThrowArgumentNullException_When_ProjectIdIsNull()
         {
             var options = new SecretManagerConfigurationOptions();
