@@ -1,5 +1,6 @@
 # [Google Secret Manager](https://cloud.google.com/secret-manager/) ConfigurationProvider
 ![.NET Core](https://github.com/Cultti/Gcp.SecretManager.Provider/workflows/.NET%20Core/badge.svg) [![codecov](https://codecov.io/gh/Cultti/Gcp.SecretManager.Provider/branch/master/graph/badge.svg)](https://codecov.io/gh/Cultti/Gcp.SecretManager.Provider)
+
 Provides access to Google Secret Manager trough ConfigurationProvider
 
 ```
