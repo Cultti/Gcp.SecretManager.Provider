@@ -35,3 +35,4 @@ jobs:
         uses: rohith/publish-nuget@v2
         with:
           PROJECT_FILE_PATH: Gcp.SecretManager.Provider/Gcp.SecretManager.Provider.csproj
+          TAG_COMMIT: false
