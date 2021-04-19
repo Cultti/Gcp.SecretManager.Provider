@@ -99,5 +99,41 @@ namespace Gcp.SecretManager.Provider.Tests
                 Assert.Equal($"{secret.SecretName.SecretId}-Value", value);
             }
         }
+
+        [Fact]
+        public void Should_FetcHierarchicalSecrets_When_LoadIsCalled()
+        {
+            var googleName = "Multi__Level__Secret";
+            var dotNetName = "Multi:Level:Secret";
+            var value = "SecretValue";
+
+            var response = new AccessSecretVersionResponse
+            {
+                Payload = new SecretPayload
+                {
+                    Data = Google.Protobuf.ByteString.CopyFromUtf8(value)
+                }
+            };
+            _mockClient.Setup(
+                x => x.AccessSecretVersionAsync(
+                    It.Is<SecretVersionName>(svn => svn.ProjectId == _secretProjectName &&
+                            svn.SecretId == googleName &&
+                            svn.SecretVersionId == "latest"), null))
+                .ReturnsAsync(response);
+
+            _testSecrets.Add(new Secret
+            {
+                SecretName = new SecretName(_secretProjectName, googleName),
+            });
+            var pagedResponse = new PagedEnumerableHelper<ListSecretsResponse, Secret>(_testSecrets);
+            _mockClient.Setup(x => x.ListSecrets(It.Is<ProjectName>(pn => pn.ProjectId == _projectName), null, null, null))
+                .Returns(pagedResponse);
+
+            var configurationProvider = new SecretManagerConfigurationProvider(_mockClient.Object, new ProjectName(_projectName));
+            configurationProvider.Load();
+
+            Assert.True(configurationProvider.TryGet(dotNetName, out var configValue));
+            Assert.Equal(value, configValue);
+        }
     }
 }

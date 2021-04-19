@@ -31,7 +31,7 @@ namespace Gcp.SecretManager.Provider
                 {
                     var secretVersionName = new SecretVersionName(secret.SecretName.ProjectId, secret.SecretName.SecretId, "latest");
                     var secretVersion = await _client.AccessSecretVersionAsync(secretVersionName);
-                    Set(secret.SecretName.SecretId, secretVersion.Payload.Data.ToStringUtf8());
+                    Set(ConvertDelimiter(secret.SecretName.SecretId), secretVersion.Payload.Data.ToStringUtf8());
                 } catch (Grpc.Core.RpcException)
                 {
                     // This might happen if secret is created but it has no versions available
@@ -39,6 +39,11 @@ namespace Gcp.SecretManager.Provider
                 }
             }
 
+        }
+
+        private static string ConvertDelimiter(string key)
+        {
+            return key.Replace("__", ConfigurationPath.KeyDelimiter);
         }
     }
 }
