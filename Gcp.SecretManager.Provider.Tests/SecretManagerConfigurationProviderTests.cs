@@ -64,7 +64,7 @@ namespace Gcp.SecretManager.Provider.Tests
         [Fact]
         public void Should_FetchSecrets_When_LoadIsCalled()
         {
-            var configurationProvider = new SecretManagerConfigurationProvider(_mockClient.Object, new ProjectName(_projectName));
+            var configurationProvider = new SecretManagerConfigurationProvider(_mockClient.Object, new ProjectName(_projectName), new DefaultSecretManagerConfigurationLoader());
             configurationProvider.Load();
 
             foreach (var secret in _testSecrets)
@@ -90,7 +90,7 @@ namespace Gcp.SecretManager.Provider.Tests
                                 svn.SecretVersionId == "latest"), null))
                     .ThrowsAsync(new Grpc.Core.RpcException(Grpc.Core.Status.DefaultCancelled));
 
-            var configurationProvider = new SecretManagerConfigurationProvider(_mockClient.Object, new ProjectName(_projectName));
+            var configurationProvider = new SecretManagerConfigurationProvider(_mockClient.Object, new ProjectName(_projectName), new DefaultSecretManagerConfigurationLoader());
             configurationProvider.Load();
 
             foreach (var secret in _testSecrets.Where(x => x.SecretName.SecretId != errorSecretId))
@@ -129,7 +129,7 @@ namespace Gcp.SecretManager.Provider.Tests
             _mockClient.Setup(x => x.ListSecrets(It.Is<ProjectName>(pn => pn.ProjectId == _projectName), null, null, null))
                 .Returns(pagedResponse);
 
-            var configurationProvider = new SecretManagerConfigurationProvider(_mockClient.Object, new ProjectName(_projectName));
+            var configurationProvider = new SecretManagerConfigurationProvider(_mockClient.Object, new ProjectName(_projectName), new DefaultSecretManagerConfigurationLoader());
             configurationProvider.Load();
 
             Assert.True(configurationProvider.TryGet(dotNetName, out var configValue));

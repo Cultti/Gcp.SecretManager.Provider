@@ -31,8 +31,9 @@ namespace Gcp.SecretManager.Provider
 
             var projectName = new ProjectName(_options.ProjectId);
             var client = CreateClient();
+            var loader = _options.Loader ?? new DefaultSecretManagerConfigurationLoader();
 
-            return new SecretManagerConfigurationProvider(client, projectName);
+            return new SecretManagerConfigurationProvider(client, projectName, loader);
         }
 
         private SecretManagerServiceClient CreateClient()
