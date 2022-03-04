@@ -6,10 +6,10 @@ namespace Gcp.SecretManager.Provider
 {
     public class DefaultSecretManagerConfigurationLoader : ISecretManagerConfigurationLoader
     {
-        public string GetKey(Secret secret)
+        public virtual string GetKey(Secret secret)
             => secret.SecretName.SecretId.Replace("__", ConfigurationPath.KeyDelimiter);
 
-        public bool Load(Secret secret)
+        public virtual bool Load(Secret secret)
             => true;
     }
 }
