@@ -4,6 +4,8 @@ using Google.Cloud.SecretManager.V1;
 using Moq;
 using System.Collections.Generic;
 using System.Linq;
+using Gcp.SecretManager.Provider.Contracts;
+using Newtonsoft.Json.Bson;
 using Xunit;
 
 namespace Gcp.SecretManager.Provider.Tests
@@ -136,6 +138,40 @@ namespace Gcp.SecretManager.Provider.Tests
 
             Assert.True(_target.TryGet(dotNetName, out var configValue));
             Assert.Equal(value, configValue);
+        }
+
+        [Fact]
+        public void Should_CallLoaderGetKey()
+        {
+            var mockLoader = new Mock<ISecretManagerConfigurationLoader>();
+            mockLoader.Setup(m => m.GetKey(It.IsAny<Secret>()))
+                .Returns((Secret secret) => secret.SecretName.SecretId);
+            mockLoader.Setup(m => m.Load(It.IsAny<Secret>())).Returns(true);
+
+            var target = new SecretManagerConfigurationProvider(_mockClient.Object, new ProjectName(_projectName), mockLoader.Object);
+
+            target.Load();
+
+            mockLoader.Verify(m => m.GetKey(It.IsAny<Secret>()), Times.Exactly(_testSecrets.Count()));
+        }
+
+        [Fact]
+        public void Should_NotLoadAllSecrets()
+        {
+            var mockLoader = new Mock<ISecretManagerConfigurationLoader>();
+            mockLoader.Setup(m => m.GetKey(It.IsAny<Secret>()))
+                .Returns((Secret secret) => secret.SecretName.SecretId);
+            mockLoader.Setup(m => m.Load(It.IsAny<Secret>())).Returns((Secret secret) =>
+                secret.SecretName.SecretId != _testSecrets.First().SecretName.SecretId);
+
+            var target = new SecretManagerConfigurationProvider(_mockClient.Object, new ProjectName(_projectName), mockLoader.Object);
+
+            target.Load();
+
+            Assert.False(target.TryGet("SecretId1", out var configValue1));
+            Assert.True(target.TryGet("SecretId2", out var configValue2));
+            Assert.True(target.TryGet("SecretId3", out var configValue3));
+            Assert.True(target.TryGet("SecretId4", out var configValue4));
         }
     }
 }
