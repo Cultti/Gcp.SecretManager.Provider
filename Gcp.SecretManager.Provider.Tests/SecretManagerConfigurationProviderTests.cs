@@ -16,6 +16,8 @@ namespace Gcp.SecretManager.Provider.Tests
         private const string _projectName = "TestProjectName";
         private const string _secretProjectName = "TestSecretProjectName";
 
+        private readonly SecretManagerConfigurationProvider _target;
+
         public SecretManagerConfigurationProviderTests()
         {
             _testSecrets = new List<Secret>
@@ -59,17 +61,18 @@ namespace Gcp.SecretManager.Provider.Tests
                                 svn.SecretVersionId == "latest"), null))
                     .ReturnsAsync(response);
             }
+
+            _target = new SecretManagerConfigurationProvider(_mockClient.Object, new ProjectName(_projectName), new DefaultSecretManagerConfigurationLoader());
         }
 
         [Fact]
         public void Should_FetchSecrets_When_LoadIsCalled()
         {
-            var configurationProvider = new SecretManagerConfigurationProvider(_mockClient.Object, new ProjectName(_projectName), new DefaultSecretManagerConfigurationLoader());
-            configurationProvider.Load();
+            _target.Load();
 
             foreach (var secret in _testSecrets)
             {
-                configurationProvider.TryGet(secret.SecretName.SecretId, out string value);
+                _target.TryGet(secret.SecretName.SecretId, out string value);
                 Assert.Equal($"{secret.SecretName.SecretId}-Value", value);
             }
         }
@@ -90,12 +93,11 @@ namespace Gcp.SecretManager.Provider.Tests
                                 svn.SecretVersionId == "latest"), null))
                     .ThrowsAsync(new Grpc.Core.RpcException(Grpc.Core.Status.DefaultCancelled));
 
-            var configurationProvider = new SecretManagerConfigurationProvider(_mockClient.Object, new ProjectName(_projectName), new DefaultSecretManagerConfigurationLoader());
-            configurationProvider.Load();
+            _target.Load();
 
             foreach (var secret in _testSecrets.Where(x => x.SecretName.SecretId != errorSecretId))
             {
-                configurationProvider.TryGet(secret.SecretName.SecretId, out string value);
+                _target.TryGet(secret.SecretName.SecretId, out string value);
                 Assert.Equal($"{secret.SecretName.SecretId}-Value", value);
             }
         }
@@ -129,10 +131,10 @@ namespace Gcp.SecretManager.Provider.Tests
             _mockClient.Setup(x => x.ListSecrets(It.Is<ProjectName>(pn => pn.ProjectId == _projectName), null, null, null))
                 .Returns(pagedResponse);
 
-            var configurationProvider = new SecretManagerConfigurationProvider(_mockClient.Object, new ProjectName(_projectName), new DefaultSecretManagerConfigurationLoader());
-            configurationProvider.Load();
 
-            Assert.True(configurationProvider.TryGet(dotNetName, out var configValue));
+            _target.Load();
+
+            Assert.True(_target.TryGet(dotNetName, out var configValue));
             Assert.Equal(value, configValue);
         }
     }
