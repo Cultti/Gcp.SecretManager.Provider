@@ -24,8 +24,16 @@ dotnet add package Gcp.SecretManager.Provider
 config.AddGcpSecretManager(options => {
    options.ProjectId = "ProjectId"; // Required
    options.CredentialsPath = "/path/to/credentials"; // Optional
+   options.Loader = new DefaultSecretManagerConfigurationLoader() // Optional, see more info below
 });
 ```
 *You can also provide CredentialsPath with GOOGLE_APPLICATION_CREDENTIALS environment variable*
 
 3. Ready to go!
+
+## Loaders
+Loaders handles if secret should be loaded and mapping from Secret Manager keys to application configuration values by implementing contract `ISecretManagerConfigurationLoader`. This can be passed as an option during setup.
+
+Contract exposes two method: `Load` and `GetKey`. `Load` method determines if the key should be loaded or not and `GetKey` handles mapping from secret to application configuration. You may access secret ID from `secret.SecretName.SecretId`
+
+If no loader is specified then `DefaultSecretManagerConfigurationLoader` will be used. It loads all keys and hierarcy is added by adding two underscores in the secret name. Eg. `MultiLevel__Secret` maps to `MultiLevel:Secret` key in application configuration.
